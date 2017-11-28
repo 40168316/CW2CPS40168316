@@ -8,9 +8,13 @@
 #include <chrono>
 #include <thread>
 #include <vector>
+#include <mutex>
 
 using namespace std;
 using namespace std::chrono;
+
+// Create a mutex as a global variable
+mutex mut;
 
 // Code taken from http://www.geeksforgeeks.org/sieve-of-eratosthenes/
 // SieveOfEratosthenes prints all the prime numbers that are smaller or equal to n. n is the number, which in this case will be a billion, which is passed into the method.
@@ -62,7 +66,7 @@ void SieveOfEratosthenes(int n)
 	delete[] prime;
 }
 
-void SieveOfEratosthenesThreaded(int n)
+void EratosthenesThreaded(int n, int g, int iterations)
 {
 	// Create the output file
 	ofstream data("data.csv", ofstream::out);
@@ -74,7 +78,7 @@ void SieveOfEratosthenesThreaded(int n)
 	memset(prime, true, sizeof(bool) * (n + 1));
 
 	// Start p at 2 (the first prime numer); while p squared is less than or equal to a billion; increment p
-	for (int p = 2; p*p <= n; p++)
+	for (int p = 2 * iterations; p*p <= (g + 1) * iterations; ++p)
 	{
 		// If prime[p] is not changed, then it is a prime
 		if (prime[p] == true)
@@ -82,10 +86,52 @@ void SieveOfEratosthenesThreaded(int n)
 			// Update all multiples of p
 			for (int i = p * 2; i <= n; i += p)
 			{
+				lock_guard<mutex> lock(mut);
 				prime[i] = false;
 			}
 		}
 	}
+
+	// Print all prime numbers
+	for (int p = 2; p <= n; ++p)
+	{
+		// If boolean is true then 
+		if (prime[p])
+		{
+			// Output the prime number to the file
+			data << p << endl;
+		}
+	}
+
+	// Delete the prime number bools
+	delete[] prime;
+}
+
+void SieveOfEratosthenesThreaded(int n)
+{
+	// Create the output file
+	ofstream data("data.csv", ofstream::out);
+
+	// Create number of threads hardware natively supports
+	auto num_threads = thread::hardware_concurrency();
+	// Create a vector of threads
+	vector<thread> threads;
+
+	auto iterations = n / num_threads;
+	// Loop through the number of threads minus 1 - i is id/iteration of the thread 
+	for (int i = 0; i < num_threads - 1; ++i)
+	{
+		// Add a thread to the end of the list with multiple paramaters - note a reference has been used to pass in the pixels vector like in the workbook
+		threads.push_back(thread(EratosthenesThreaded, n, i, iterations));
+	}
+
+	// Join the threads 
+	for (auto &t : threads)
+	{
+		t.join();
+	}
+
+	//EratosthenesThreaded(n, prime);
 
 	// Print all prime numbers
 	//for (int p = 2; p <= n; p++)
@@ -97,9 +143,6 @@ void SieveOfEratosthenesThreaded(int n)
 	//		data << p << endl;
 	//	}
 	//}
-
-	// Delete the prime number bools
-	delete[] prime;
 }
 
 // Code taken from http://www.geeksforgeeks.org/sieve-of-atkin/
@@ -286,7 +329,7 @@ int main()
 	ofstream times("times.csv", ofstream::out);
 	
 	// For the 20 runs
-	for (int i = 0; i < 20; i++)
+	for (int i = 0; i < 1; i++)
 	{
 		// Start timing from this part of the algorithm. This is because some tests require more spheres than others.
 		auto start = system_clock::now();
@@ -297,10 +340,11 @@ int main()
 
 		// Call the method which finds prime numbers using the Sieve of Eratosthenes Algorithm
 		//SieveOfEratosthenes(1000000000);
+		SieveOfEratosthenesThreaded(1000000000);
 
 		// Call the method which finds prime numbers using the Sieve of Sundaram Algorithm
-		int n = 1000000000;
-		SieveOfSundaram(n);
+		//int n = 1000000000;
+		//SieveOfSundaram(n);
 
 		// End timing here as the algorithm has complete. 
 		auto end = system_clock::now();
