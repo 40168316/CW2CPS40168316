@@ -14,7 +14,7 @@ void openMP::sundaramOpenMP(int inputNumber)
 {
 	// Set the initial variables
 	int TheseArePrime = 0; // variable used in the array that stores the prime numbers found
-	//int totalPrimes = 0; // total number of prime numbers that are found
+	int totalPrimes = 0; // total number of prime numbers that are found
 	// Get n which is the inout number divided by 2
 	int n = inputNumber / 2;
 
@@ -26,16 +26,15 @@ void openMP::sundaramOpenMP(int inputNumber)
 
 	// Fill the array with a list of integers up to the inputNumber  
 	// For i equals zero; while i is less then 1 billion; increment i
-#pragma omp parallel for num_threads(num_threads)
 	for (int i = 0; i < inputNumber; i++)
 	{
 		isPrime[i] = i + 1;
 	}
 
 	// For i equals one; while i is less than n (calculated above); increment i
-#pragma omp parallel for num_threads(num_threads)
 	for (int i = 1; i < n; i++)
 	{
+//#pragma omp parallel for num_threads(num_threads) 
 		// for j equals i; while j is less than or equal to n minus 1 divided by 2 times i pluys 1; increment j
 		for (int j = i; j <= (n - i) / (2 * i + 1); j++)
 		{
@@ -47,11 +46,10 @@ void openMP::sundaramOpenMP(int inputNumber)
 	if (inputNumber >= 2)
 	{
 		isPrime[TheseArePrime++] = 2;/*this IF statement adds 2 to the output since 2 is a prime number    */
-		//totalPrimes++;
+		totalPrimes++;
 	}
 
 	// For i equal 1; while i is less than n; increment i
-#pragma omp parallel for num_threads(num_threads)
 	for (int i = 1; i < n; i++)
 	{
 		// If isPrime[i] is not equal to zero then
@@ -61,26 +59,26 @@ void openMP::sundaramOpenMP(int inputNumber)
 			// (i.e., all primes except the only even prime 2) below 2n + 2.
 
 			isPrime[TheseArePrime++] = i * 2 + 1;
-			//totalPrimes++; // the counter of the number of primes found
+			totalPrimes++; // the counter of the number of primes found
 		}
 	}
 
 	// Output Prime Numbers
-	// Create the output file for the prime numbers to be stored
-	//ofstream data("data.csv", ofstream::out);
-	//// For the total number of primes
-	//for (int x = 0; x < totalPrimes; x++)
-	//{
-	//// If the prime number does not equal zero then output - else then break
-	//	if (isPrime[x] != 0)
-	//	{
-	//		data << isPrime[x] << endl;
-	//	}
-	//	else
-	//	{
-	//		break;
-	//	}
-	//}
+	 //Create the output file for the prime numbers to be stored
+	ofstream data("data.csv", ofstream::out);
+	// For the total number of primes
+	for (int x = 0; x < totalPrimes; x++)
+	{
+	// If the prime number does not equal zero then output - else then break
+		if (isPrime[x] != 0)
+		{
+			data << isPrime[x] << endl;
+		}
+		else
+		{
+			break;
+		}
+	}
 
 	// Delete the prime number bools
 	delete[] isPrime;
@@ -179,30 +177,22 @@ void openMP::atkinOpenMp(int limit)
 
 void openMP::eratosthenesOpenMP(int n)
 {
-	// Get the number of threads the hardware can natively support
-
 	// Setup 1 billion and one booleans
 	bool* prime = new bool[n + 1];
 	// Memset sets a billion bytes of the block of memory pointed by prime to the value of true
 	memset(prime, true, sizeof(bool) * (n + 1));
 
-	// As OpenMP cannot do arithmetic (ie p*p) in the original for loop then instead of doing p*p <= n
-	// The line is changed to p <= t where t is the square root of n
-	int nSQRT = sqrt(n);
-	// Delcare p before the for loop - p will be shared by default and not set to private
-	int p;
-
+	// Get the number of threads the hardware can natively support
 	auto num_threads = thread::hardware_concurrency();
-
-#pragma omp parallel for num_threads(num_threads)
 	// Start p at 2 (the first prime numer); while p squared is less than or equal to a billion; increment p
-	for (p = 2; p < nSQRT; p++)
+	for (int p = 2; p*p < n; p++)
 	{
 		// If prime[p] is not changed, then it is a prime
 		if (prime[p] == true)
 		{
+#pragma omp parallel for num_threads(num_threads)
 			// Update all multiples of p
-			for (unsigned int i = p * 2; i <= n; i += p)
+			for (int i = p * 2; i <= n; i += p)
 			{
 				prime[i] = false;
 			}
