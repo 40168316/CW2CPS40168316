@@ -9,12 +9,13 @@
 #include <thread>
 #include <vector>
 #include <mutex>
+#include "multiThreading.h"
+#include "openMP.h"
+#include <omp.h>
+#include <math.h>
 
 using namespace std;
 using namespace std::chrono;
-
-// Create a mutex as a global variable
-mutex mut;
 
 // Code taken from http://www.geeksforgeeks.org/sieve-of-eratosthenes/
 // SieveOfEratosthenes prints all the prime numbers that are smaller or equal to n. n is the number, which in this case will be a billion, which is passed into the method.
@@ -28,14 +29,12 @@ mutex mut;
 // Sieve of Eratosthenes which takes in the value of 1 billion
 void SieveOfEratosthenes(int n)
 {
-	// Create the output file
-	ofstream data("data.csv", ofstream::out);
 	// Create a boolean array "prime[0..n]" and initialize
 	// all entries it as true. A value in prime[i] will
 	// finally be false if i is Not a prime, else true.
 	bool* prime = new bool[n + 1];
 	// Memset sets a billion bytes of the block of memory pointed by prime to the value of true
-	memset(prime, true, sizeof(bool) * (n+1));
+	memset(prime, true, sizeof(bool) * (n + 1));
 
 	// Start p at 2 (the first prime numer); while p squared is less than or equal to a billion; increment p
 	for (int p = 2; p*p <= n; p++)
@@ -51,6 +50,9 @@ void SieveOfEratosthenes(int n)
 		}
 	}
 
+	// Create the output file
+	//ofstream data("data.csv", ofstream::out);
+
 	// Print all prime numbers
 	//for (int p = 2; p <= n; p++)
 	//{
@@ -64,85 +66,6 @@ void SieveOfEratosthenes(int n)
 
 	// Delete the prime number bools
 	delete[] prime;
-}
-
-void EratosthenesThreaded(int n, int g, int iterations)
-{
-	// Create the output file
-	ofstream data("data.csv", ofstream::out);
-	// Create a boolean array "prime[0..n]" and initialize
-	// all entries it as true. A value in prime[i] will
-	// finally be false if i is Not a prime, else true.
-	bool* prime = new bool[n + 1];
-	// Memset sets a billion bytes of the block of memory pointed by prime to the value of true
-	memset(prime, true, sizeof(bool) * (n + 1));
-
-	// Start p at 2 (the first prime numer); while p squared is less than or equal to a billion; increment p
-	for (int p = 2 * iterations; p*p <= (g + 1) * iterations; ++p)
-	{
-		// If prime[p] is not changed, then it is a prime
-		if (prime[p] == true)
-		{
-			// Update all multiples of p
-			for (int i = p * 2; i <= n; i += p)
-			{
-				lock_guard<mutex> lock(mut);
-				prime[i] = false;
-			}
-		}
-	}
-
-	// Print all prime numbers
-	for (int p = 2; p <= n; ++p)
-	{
-		// If boolean is true then 
-		if (prime[p])
-		{
-			// Output the prime number to the file
-			data << p << endl;
-		}
-	}
-
-	// Delete the prime number bools
-	delete[] prime;
-}
-
-void SieveOfEratosthenesThreaded(int n)
-{
-	// Create the output file
-	ofstream data("data.csv", ofstream::out);
-
-	// Create number of threads hardware natively supports
-	auto num_threads = thread::hardware_concurrency();
-	// Create a vector of threads
-	vector<thread> threads;
-
-	auto iterations = n / num_threads;
-	// Loop through the number of threads minus 1 - i is id/iteration of the thread 
-	for (int i = 0; i < num_threads - 1; ++i)
-	{
-		// Add a thread to the end of the list with multiple paramaters - note a reference has been used to pass in the pixels vector like in the workbook
-		threads.push_back(thread(EratosthenesThreaded, n, i, iterations));
-	}
-
-	// Join the threads 
-	for (auto &t : threads)
-	{
-		t.join();
-	}
-
-	//EratosthenesThreaded(n, prime);
-
-	// Print all prime numbers
-	//for (int p = 2; p <= n; p++)
-	//{
-	//	// If boolean is true then 
-	//	if (prime[p])
-	//	{
-	//		// Output the prime number to the file
-	//		data << p << endl;
-	//	}
-	//}
 }
 
 // Code taken from http://www.geeksforgeeks.org/sieve-of-atkin/
@@ -162,13 +85,6 @@ void SieveOfEratosthenesThreaded(int n)
 // Sieve of Atkin which takes in the value of 1 billion
 void SieveOfAtkin(int limit)
 {
-	// Create the output file for the prime numbers to be stored
-	ofstream data("data.csv", ofstream::out);
-
-	// 2 and 3 are known to be prime so output them first to the file
-	if (limit > 2)  data << 2 << " ";
-	if (limit > 3)  data << 3 << " ";
-
 	// Initialise and set the sieve array with false values
 	bool* sieve = new bool[limit];
 	for (int i = 0; i < limit; i++)
@@ -227,8 +143,15 @@ void SieveOfAtkin(int limit)
 		}
 	}
 
-	// Output all the prime numbers 
-	// For a = 5;while a is less than 1 billion; increment a
+	//// Output all the prime numbers 
+	//// Create the output file for the prime numbers to be stored
+	//ofstream data("data.csv", ofstream::out);
+
+	//// 2 and 3 are known to be prime so output them first to the file
+	//if (limit > 2)  data << 2 << endl;
+	//if (limit > 3)  data << 3 << endl;
+
+	//// For a = 5;while a is less than 1 billion; increment a
 	//for (int a = 5; a < limit; a++)
 	//{
 	//	// If sieve[a] is equal to true then output to the data file
@@ -254,9 +177,6 @@ void SieveOfAtkin(int limit)
 // Sieve of Sundaram which takes in the value of 1 billion
 void SieveOfSundaram(int inputNumber)
 {
-	// Create the output file for the prime numbers to be stored
-	ofstream data("data.csv", ofstream::out);
-
 	// Set the initial variables
 	int TheseArePrime = 0; // variable used in the array that stores the prime numbers found
 	//int totalPrimes = 0; // total number of prime numbers that are found
@@ -305,6 +225,8 @@ void SieveOfSundaram(int inputNumber)
 	}
 
 	// Output Prime Numbers
+	// Create the output file for the prime numbers to be stored
+	//ofstream data("data.csv", ofstream::out);
 	// For the total number of primes
 	//for (int x = 0; x < totalPrimes; x++)
 	//{
@@ -323,28 +245,70 @@ void SieveOfSundaram(int inputNumber)
 	delete[] isPrime;
 }
 
+void eratosthenesThreaded(int n)
+{
+	multiThreading *thr = new multiThreading();
+
+	auto num_threads = thread::hardware_concurrency();
+	// Create a vector of threads
+	vector<thread> threads;
+
+	auto iterations = n / num_threads;
+	// Loop through the number of threads minus 1 - i is id/iteration of the thread 
+	for (int i = 1; i < num_threads; ++i)
+	{
+		// Add a thread to the end of the list with multiple paramaters - note a reference has been used to pass in the pixels vector like in the workbook
+		threads.push_back(thread(&multiThreading::EratosthenesThreaded, thr, n, i, iterations));
+	}
+
+	// Join the threads 
+	for (auto &t : threads)
+	{
+		t.join();
+	}
+
+	delete thr;
+}
+
 int main()
 {
+	openMP omp;
+
 	// Create the output file
 	ofstream times("times.csv", ofstream::out);
-	
+
 	// For the 20 runs
 	for (int i = 0; i < 1; i++)
 	{
+		// Call the method which finds prime numbers using the Sieve of Atkin Algorithm
+		int billion = 1000000000;
+
 		// Start timing from this part of the algorithm. This is because some tests require more spheres than others.
 		auto start = system_clock::now();
 
-		// Call the method which finds prime numbers using the Sieve of Atkin Algorithm
-		//int limit = 1000000000;
-		//SieveOfAtkin(limit);
+		// SieveOfAtkin 
 
-		// Call the method which finds prime numbers using the Sieve of Eratosthenes Algorithm
-		//SieveOfEratosthenes(1000000000);
-		SieveOfEratosthenesThreaded(1000000000);
+		// Normal algorithm
+		SieveOfAtkin(billion);
+		SieveOfEratosthenes(billion);
+		SieveOfSundaram(billion);
 
-		// Call the method which finds prime numbers using the Sieve of Sundaram Algorithm
-		//int n = 1000000000;
-		//SieveOfSundaram(n);
+		// OpenMP
+		//omp.atkinOpenMp(billion);
+
+		// SieveOfEratosthenes
+		// Normal algorithm
+		//SieveOfEratosthenes(billion);
+		// Threaded algorithm
+		//eratosthenesThreaded(billion);
+		// OpenMP algorithm
+		//omp.eratosthenesOpenMP(billion);
+
+		// SieveOfSundaram
+		// Normal algorithm
+		//SieveOfSundaram(billion);
+		// OpenMP algorithm
+		//omp.sundaramOpenMP(billion);
 
 		// End timing here as the algorithm has complete. 
 		auto end = system_clock::now();
@@ -355,7 +319,7 @@ int main()
 		// Output that time to a file
 		times << duration_cast<milliseconds>(total).count() << endl;
 		//cout << duration_cast<milliseconds>(total).count() << endl;
-	}	
+	}
 
-    return 0;
+	return 0;
 }
