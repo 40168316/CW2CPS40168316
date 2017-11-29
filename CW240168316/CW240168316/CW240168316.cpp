@@ -287,12 +287,8 @@ int main()
 		auto start = system_clock::now();
 
 		// SieveOfAtkin 
-
 		// Normal algorithm
-		SieveOfAtkin(billion);
-		SieveOfEratosthenes(billion);
-		SieveOfSundaram(billion);
-
+		//SieveOfAtkin(billion);
 		// OpenMP
 		//omp.atkinOpenMp(billion);
 
@@ -308,7 +304,7 @@ int main()
 		// Normal algorithm
 		//SieveOfSundaram(billion);
 		// OpenMP algorithm
-		//omp.sundaramOpenMP(billion);
+		omp.sundaramOpenMP(billion);
 
 		// End timing here as the algorithm has complete. 
 		auto end = system_clock::now();
