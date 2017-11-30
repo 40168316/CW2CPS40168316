@@ -25,13 +25,13 @@ void multiThreading::EratosthenesThreaded(int n, int g, int iterations)
 	memset(prime, true, sizeof(bool) * (n + 1));
 
 	// Start p at 2 (the first prime numer); while p squared is less than or equal to a billion; increment p
-	for (int p = 2 * iterations; p*p <= (g + 1) * iterations; ++p)
+	for (unsigned int p = 2 * iterations; p*p <= (g + 1) * iterations; ++p)
 	{
 		// If prime[p] is not changed, then it is a prime
 		if (prime[p] == true)
 		{
 			// Update all multiples of p
-			for (int i = p * 2; i <= n; i += p)
+			for (unsigned int i = p * 2; i <= n; i += p)
 			{
 				lock_guard<mutex> lock(mut);
 				prime[i] = false;

@@ -31,12 +31,12 @@ void openMP::sundaramOpenMP(int inputNumber)
 		isPrime[i] = i + 1;
 	}
 
+#pragma omp parallel for num_threads(num_threads) schedule(static, 16)
 	// For i equals one; while i is less than n (calculated above); increment i
-	for (int i = 1; i < n; i++)
+	for (int i = 1; i < n; ++i)
 	{
-//#pragma omp parallel for num_threads(num_threads) 
 		// for j equals i; while j is less than or equal to n minus 1 divided by 2 times i pluys 1; increment j
-		for (int j = i; j <= (n - i) / (2 * i + 1); j++)
+		for (int j = i; j <= (n - i) / (2 * i + 1); ++j)
 		{
 			isPrime[i + j + 2 * i * j] = 0;/*From this list, remove all numbers of the form i + j + 2ij */
 		}
@@ -65,20 +65,20 @@ void openMP::sundaramOpenMP(int inputNumber)
 
 	// Output Prime Numbers
 	 //Create the output file for the prime numbers to be stored
-	ofstream data("data.csv", ofstream::out);
-	// For the total number of primes
-	for (int x = 0; x < totalPrimes; x++)
-	{
-	// If the prime number does not equal zero then output - else then break
-		if (isPrime[x] != 0)
-		{
-			data << isPrime[x] << endl;
-		}
-		else
-		{
-			break;
-		}
-	}
+	//ofstream data("data.csv", ofstream::out);
+	//// For the total number of primes
+	//for (int x = 0; x < totalPrimes; x++)
+	//{
+	//// If the prime number does not equal zero then output - else then break
+	//	if (isPrime[x] != 0)
+	//	{
+	//		data << isPrime[x] << endl;
+	//	}
+	//	else
+	//	{
+	//		break;
+	//	}
+	//}
 
 	// Delete the prime number bools
 	delete[] isPrime;

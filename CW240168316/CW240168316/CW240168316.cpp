@@ -278,7 +278,7 @@ int main()
 	ofstream times("times.csv", ofstream::out);
 
 	// For the 20 runs
-	for (int i = 0; i < 1; i++)
+	for (int i = 0; i < 2; i++)
 	{
 		// Call the method which finds prime numbers using the Sieve of Atkin Algorithm
 		int billion = 1000000000;
@@ -288,7 +288,7 @@ int main()
 
 		// SieveOfAtkin 
 		// Normal algorithm
-		//SieveOfAtkin(billion);
+		SieveOfAtkin(billion);
 		// OpenMP
 		//omp.atkinOpenMp(billion);
 
@@ -304,7 +304,7 @@ int main()
 		// Normal algorithm
 		//SieveOfSundaram(billion);
 		// OpenMP algorithm
-		omp.sundaramOpenMP(billion);
+		//omp.sundaramOpenMP(billion);
 
 		// End timing here as the algorithm has complete. 
 		auto end = system_clock::now();
