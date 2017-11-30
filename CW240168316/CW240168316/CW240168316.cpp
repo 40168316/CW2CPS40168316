@@ -9,7 +9,6 @@
 #include <thread>
 #include <vector>
 #include <mutex>
-#include "multiThreading.h"
 #include "openMP.h"
 #include <omp.h>
 #include <math.h>
@@ -51,24 +50,25 @@ void SieveOfEratosthenes(int n)
 	}
 
 	// Create the output file
-	//ofstream data("data.csv", ofstream::out);
+	ofstream data("data.csv", ofstream::out);
 
-	// Print all prime numbers
-	//for (int p = 2; p <= n; p++)
-	//{
-	//	// If boolean is true then 
-	//	if (prime[p])
-	//	{
-	//		// Output the prime number to the file
-	//		data << p << endl;
-	//	}
-	//}
+	 ////Print all prime numbers
+	for (int p = 2; p <= n; p++)
+	{
+		// If boolean is true then 
+		if (prime[p])
+		{
+			// Output the prime number to the file
+			data << p << endl;
+		}
+	}
 
 	// Delete the prime number bools
 	delete[] prime;
 }
 
-// Code taken from http://www.geeksforgeeks.org/sieve-of-atkin/
+// Code taken from http://www.sanfoundry.com/cpp-program-implement-sieve-atkins/
+// Theory take from http://www.geeksforgeeks.org/sieve-of-atkin/
 // Sieve Of Atkin is a method which takes in the limit - which in this case is 1 billion, creates results lists filled with 2, 3, 5 and finds the prime numbers.
 // The full process of Sieve of atkin works by creating a results list, filled with 2, 3, and 5. The algorithm then creates a sieve list with an entry for each positive integer.
 // All entries of this list should initially be marked non prime. For each entry number n in the sieve list, with modulo - sixty reaminer r:
@@ -83,87 +83,81 @@ void SieveOfEratosthenes(int n)
 // Note that the code has been slightly modified as a billion booleans need to be made
 
 // Sieve of Atkin which takes in the value of 1 billion
-void SieveOfAtkin(int limit)
+void SieveOfAtkin(int n)
 {
-	// Initialise and set the sieve array with false values
-	bool* sieve = new bool[limit];
-	for (int i = 0; i < limit; i++)
+	// Create a boolean of one billion and one prime numbers
+	vector<bool> is_prime(n + 1);
+	// Set booleans at index two and three to true
+	is_prime[2] = true;
+	is_prime[3] = true;
+
+	// From 5 to one billion, set all the values to false
+	for (int i = 5; i <= n; i++)
 	{
-		sieve[i] = false;
+		is_prime[i] = false;
 	}
 
-	// Make sieve[n] true if one of the following coditions is true:
-	// a) n = (4*x*x)+(y*y) has odd number of solutions, i.e., there exist odd number of distinct pairs (x, y) that satisfy the equation and n % 12 = 1 or n % 12 = 5.
-	// b) n = (3*x*x)+(y*y) has odd number of solutions and n % 12 = 7
-	// c) n = (3*x*x)-(y*y) has odd number of solutions, x > y and n % 12 = 11 */
-	// For x equal 1; while x squared is less than 1 billion; increment x
-	for (int x = 1; x*x < limit; x++)
+	// Get the limit by square rooting n 
+	int lim = ceil(sqrt(n));
+	// For x equals one; while x is less than or equal to the limit; increment x
+	for (int x = 1; x <= lim; x++)
 	{
-		// For y equal 1; while y squared is less than 1 billion; increment y
-		for (int y = 1; y*y < limit; y++)
+		// For y equals one; while y is less than or equal to the limit; increment y
+		for (int y = 1; y <= lim; y++)
 		{
 			// Main part of Sieve of Atkin - make n equal to 4 time x squared plus y squared
-			int n = (4 * x*x) + (y*y);
-			// If n is less than or equal too 1 billion and if n divided by 12 is remainder 1 or remadiner 5 then make sieve[n] equal to true
-			if (n <= limit && (n % 12 == 1 || n % 12 == 5))
+			int num = (4 * x * x + y * y);
+			// If num is less than or equal too 1 billion and if num divided by 12 is remainder 1 or remadiner 5 then make is_prime[num] equal to true
+			if (num <= n && (num % 12 == 1 || num % 12 == 5))
 			{
-				sieve[n] ^= true;
+				is_prime[num] = true;
 			}
 
 			// Make n equal 3 time n squared plus y squared
-			n = (3 * x*x) + (y*y);
-			// If n is less than or equal too a billion and if n divided by 12 is remainder 7 then make sieve[n] equal to true
-			if (n <= limit && n % 12 == 7)
+			num = (3 * x * x + y * y);
+			// If num is less than or equal too 1 billion and if num divided by 12 is remainder 7 then make is_prime[num] equal to true
+			if (num <= n && (num % 12 == 7))
 			{
-				sieve[n] ^= true;
+				is_prime[num] = true;
 			}
 
-			// Make n equal 3 time n squared plus y squared
-			n = (3 * x*x) - (y*y);
-			// If n is less than or equal too a billion and if n divided by 12 is remainder 11 then make sieve[n] equal to true
-			if (x > y && n <= limit && n % 12 == 11)
+			// If x is great than y
+			if (x > y)
 			{
-				sieve[n] ^= true;
+				// Make n equal 3 time n squared plus y squared
+				num = (3 * x * x - y * y);
+				// If num is less than or equal too 1 billion and if num divided by 12 is remainder 11 then make is_prime[num] equal to true
+				if (num <= n && (num % 12 == 11))
+				{
+					is_prime[num] = true;
+				}
 			}
 		}
 	}
 
-	// Mark all multiples of squares as non-prime
-	// for r = 5; while r squared is less than a billion; increment r
-	for (int r = 5; r*r < limit; r++)
+	// For i is equal to 5; i is less than or equal to the limit; increment i
+	for (int i = 5; i <= lim; i++)
 	{
-		// If sieve[r] is equal to true then
-		if (sieve[r])
+		// If is_prime 5 to a billion is true then
+		if (is_prime[i])
 		{
-			// for i = r squared; i is less than 1 billion; i += r squared then make sieve[i] equal to false
-			for (int i = r*r; i < limit; i += r*r)
+			// for j equals i squared; while j is less than or equal to n; j plus equals i make is_prime[j] equal to false 
+			for (int j = i * i; j <= n; j += i)
 			{
-				sieve[i] = false;
+				is_prime[j] = false;
 			}
 		}
 	}
 
-	//// Output all the prime numbers 
-	//// Create the output file for the prime numbers to be stored
-	//ofstream data("data.csv", ofstream::out);
-
-	//// 2 and 3 are known to be prime so output them first to the file
-	//if (limit > 2)  data << 2 << endl;
-	//if (limit > 3)  data << 3 << endl;
-
-	//// For a = 5;while a is less than 1 billion; increment a
-	//for (int a = 5; a < limit; a++)
-	//{
-	//	// If sieve[a] is equal to true then output to the data file
-	//	if (sieve[a])
-	//	{
-	//		//cout << a << endl;
-	//		data << a << endl;
-	//	}
-	//}
-
-	// Delete the prime number bools
-	delete[] sieve;
+	// Output the data if the values are prime numbers 
+	ofstream data("data.csv", ofstream::out);
+	for (int i = 2; i <= n; i++)
+	{
+		if (is_prime[i])
+		{
+			data << i << endl;
+		}
+	}
 }
 
 // Code taken from http://bcbutler.com/CPP_Tuts/c_plus_plus_sieve_of_sundaram.php 
@@ -207,7 +201,7 @@ void SieveOfSundaram(int inputNumber)
 	if (inputNumber >= 2)
 	{
 		isPrime[TheseArePrime++] = 2;/*this IF statement adds 2 to the output since 2 is a prime number    */
-		// totalPrimes++;
+		 //totalPrimes++;
 	}
 
 	// For i equal 1; while i is less than n; increment i
@@ -227,10 +221,10 @@ void SieveOfSundaram(int inputNumber)
 	// Output Prime Numbers
 	// Create the output file for the prime numbers to be stored
 	//ofstream data("data.csv", ofstream::out);
-	// For the total number of primes
+	//// For the total number of primes
 	//for (int x = 0; x < totalPrimes; x++)
 	//{
-	// If the prime number does not equal zero then output - else then break
+	//// If the prime number does not equal zero then output - else then break
 	//	if (isPrime[x] != 0)
 	//	{
 	//		data << isPrime[x] << endl;
@@ -245,31 +239,6 @@ void SieveOfSundaram(int inputNumber)
 	delete[] isPrime;
 }
 
-void eratosthenesThreaded(int n)
-{
-	multiThreading *thr = new multiThreading();
-
-	auto num_threads = thread::hardware_concurrency();
-	// Create a vector of threads
-	vector<thread> threads;
-
-	auto iterations = n / num_threads;
-	// Loop through the number of threads minus 1 - i is id/iteration of the thread 
-	for (int i = 1; i < num_threads; ++i)
-	{
-		// Add a thread to the end of the list with multiple paramaters - note a reference has been used to pass in the pixels vector like in the workbook
-		threads.push_back(thread(&multiThreading::EratosthenesThreaded, thr, n, i, iterations));
-	}
-
-	// Join the threads 
-	for (auto &t : threads)
-	{
-		t.join();
-	}
-
-	delete thr;
-}
-
 int main()
 {
 	openMP omp;
@@ -278,7 +247,7 @@ int main()
 	ofstream times("times.csv", ofstream::out);
 
 	// For the 20 runs
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < 20; i++)
 	{
 		// Call the method which finds prime numbers using the Sieve of Atkin Algorithm
 		int billion = 1000000000;
@@ -288,21 +257,19 @@ int main()
 
 		// SieveOfAtkin 
 		// Normal algorithm
-		SieveOfAtkin(billion);
+		//SieveOfAtkin(billion);					// Correct file fize
 		// OpenMP
-		//omp.atkinOpenMp(billion);
+		//omp.atkinOpenMp(billion);					// Correct file fize
 
 		// SieveOfEratosthenes
 		// Normal algorithm
-		//SieveOfEratosthenes(billion);
-		// Threaded algorithm
-		//eratosthenesThreaded(billion);
+		//SieveOfEratosthenes(billion);			// Correct file fize
 		// OpenMP algorithm
-		//omp.eratosthenesOpenMP(billion);
+		//omp.eratosthenesOpenMP(billion);		// Correct file fize
 
 		// SieveOfSundaram
 		// Normal algorithm
-		//SieveOfSundaram(billion);
+		SieveOfSundaram(billion);				// Correct file fize
 		// OpenMP algorithm
 		//omp.sundaramOpenMP(billion);
 

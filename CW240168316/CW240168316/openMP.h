@@ -8,7 +8,6 @@
 #include <thread>
 #include <vector>
 #include <mutex>
-#include "multiThreading.h"
 #include <omp.h>
 #include <math.h>
 

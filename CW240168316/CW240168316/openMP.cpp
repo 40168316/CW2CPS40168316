@@ -31,7 +31,7 @@ void openMP::sundaramOpenMP(int inputNumber)
 		isPrime[i] = i + 1;
 	}
 
-#pragma omp parallel for num_threads(num_threads) schedule(static, 16)
+#pragma omp parallel for schedule(static, 8) num_threads(num_threads)
 	// For i equals one; while i is less than n (calculated above); increment i
 	for (int i = 1; i < n; ++i)
 	{
@@ -64,7 +64,7 @@ void openMP::sundaramOpenMP(int inputNumber)
 	}
 
 	// Output Prime Numbers
-	 //Create the output file for the prime numbers to be stored
+	// Create the output file for the prime numbers to be stored
 	//ofstream data("data.csv", ofstream::out);
 	//// For the total number of primes
 	//for (int x = 0; x < totalPrimes; x++)
@@ -84,95 +84,85 @@ void openMP::sundaramOpenMP(int inputNumber)
 	delete[] isPrime;
 }
 
-void openMP::atkinOpenMp(int limit)
+void openMP::atkinOpenMp(int n)
 {
 	// Get the number of threads the hardware can natively support
 	auto num_threads = thread::hardware_concurrency();
 
-	// Initialise and set the sieve array with false values
-	bool* sieve = new bool[limit];
+	// Create a boolean of one billion and one prime numbers
+	vector<bool> is_prime(n + 1);
+	// Set booleans at index two and three to true
+	is_prime[2] = true;
+	is_prime[3] = true;
 
-	int i;
-
-#pragma omp parallel for num_threads(num_threads)
-	for (i = 0; i < limit; i++)
+	// From 5 to one billion, set all the values to false
+	for (int i = 5; i <= n; i++)
 	{
-		sieve[i] = false;
+		is_prime[i] = false;
 	}
 
-	// Make sieve[n] true if one of the following coditions is true:
-	// a) n = (4*x*x)+(y*y) has odd number of solutions, i.e., there exist odd number of distinct pairs (x, y) that satisfy the equation and n % 12 = 1 or n % 12 = 5.
-	// b) n = (3*x*x)+(y*y) has odd number of solutions and n % 12 = 7
-	// c) n = (3*x*x)-(y*y) has odd number of solutions, x > y and n % 12 = 11 */
-	// For x equal 1; while x squared is less than 1 billion; increment x
-	int limitSQRT = sqrt(limit);
-#pragma omp parallel for num_threads(num_threads)
-	for (int x = 1; x < limitSQRT; x++)
+	// Get the limit by square rooting n 
+	int lim = ceil(sqrt(n));
+	// For x equals one; while x is less than or equal to the limit; increment x
+#pragma omp parallel for schedule(static, 8) num_threads(num_threads) 
+	for (int x = 1; x <= lim; x++)
 	{
-		// For y equal 1; while y squared is less than 1 billion; increment y
-		for (int y = 1; y*y < limit; y++)
+		// For y equals one; while y is less than or equal to the limit; increment y
+		for (int y = 1; y <= lim; y++)
 		{
 			// Main part of Sieve of Atkin - make n equal to 4 time x squared plus y squared
-			int n = (4 * x*x) + (y*y);
-			// If n is less than or equal too 1 billion and if n divided by 12 is remainder 1 or remadiner 5 then make sieve[n] equal to true
-			if (n <= limit && (n % 12 == 1 || n % 12 == 5))
+			int num = (4 * x * x + y * y);
+			// If num is less than or equal too 1 billion and if num divided by 12 is remainder 1 or remadiner 5 then make is_prime[num] equal to true
+			if (num <= n && (num % 12 == 1 || num % 12 == 5))
 			{
-				sieve[n] ^= true;
+				is_prime[num] = true;
 			}
 
 			// Make n equal 3 time n squared plus y squared
-			n = (3 * x*x) + (y*y);
-			// If n is less than or equal too a billion and if n divided by 12 is remainder 7 then make sieve[n] equal to true
-			if (n <= limit && n % 12 == 7)
+			num = (3 * x * x + y * y);
+			// If num is less than or equal too 1 billion and if num divided by 12 is remainder 7 then make is_prime[num] equal to true
+			if (num <= n && (num % 12 == 7))
 			{
-				sieve[n] ^= true;
+				is_prime[num] = true;
 			}
 
-			// Make n equal 3 time n squared plus y squared
-			n = (3 * x*x) - (y*y);
-			// If n is less than or equal too a billion and if n divided by 12 is remainder 11 then make sieve[n] equal to true
-			if (x > y && n <= limit && n % 12 == 11)
+			// If x is great than y
+			if (x > y)
 			{
-				sieve[n] ^= true;
+				// Make n equal 3 time n squared plus y squared
+				num = (3 * x * x - y * y);
+				// If num is less than or equal too 1 billion and if num divided by 12 is remainder 11 then make is_prime[num] equal to true
+				if (num <= n && (num % 12 == 11))
+				{
+					is_prime[num] = true;
+				}
 			}
 		}
 	}
 
-	// Mark all multiples of squares as non-prime
-	// for r = 5; while r squared is less than a billion; increment r
-#pragma omp parallel for num_threads(num_threads)
-	for (int r = 5; r < limitSQRT; r++)
+	// For i is equal to 5; i is less than or equal to the limit; increment i
+	for (int i = 5; i <= lim; i++)
 	{
-		// If sieve[r] is equal to true then
-		if (sieve[r])
+		// If is_prime 5 to a billion is true then
+		if (is_prime[i])
 		{
-			// for i = r squared; i is less than 1 billion; i += r squared then make sieve[i] equal to false
-			for (int i = r*r; i < limit; i += r*r)
+			// for j equals i squared; while j is less than or equal to n; j plus equals i make is_prime[j] equal to false 
+			for (int j = i * i; j <= n; j += i)
 			{
-				sieve[i] = false;
+				is_prime[j] = false;
 			}
 		}
 	}
 
-	//// Create the output file
-	//ofstream data("data.csv", ofstream::out);
-	////// Output all the prime numbers 
-	////// 2 and 3 are known to be prime so output them first to the file
-	//if (limit > 2)  data << 2 << endl;
-	//if (limit > 3)  data << 3 << endl;
-	////// For a = 5; while a is less than 1 billion; increment a
-	//for (int a = 5; a < limit; a++)
-	//{
-	//	// If sieve[a] is equal to true then output to the data file
-	//	if (sieve[a])
-	//	{
-	//		//cout << a << endl;
-	//		data << a << endl;
-	//	}
-	//}
-
-	// Delete the prime number bools
-	delete[] sieve;
+	// Output the data if the values are prime numbers 
+	ofstream data("data.csv", ofstream::out);
+	for (int i = 2; i <= n; i++)
+	{
+		if (is_prime[i])
+		{
+			data << i << endl;
+		}
+	}
 }
 
 void openMP::eratosthenesOpenMP(int n)
@@ -190,7 +180,7 @@ void openMP::eratosthenesOpenMP(int n)
 		// If prime[p] is not changed, then it is a prime
 		if (prime[p] == true)
 		{
-#pragma omp parallel for num_threads(num_threads)
+#pragma omp parallel for schedule(static, 8) num_threads(num_threads)
 			// Update all multiples of p
 			for (int i = p * 2; i <= n; i += p)
 			{
@@ -200,17 +190,17 @@ void openMP::eratosthenesOpenMP(int n)
 	}
 
 	// Create the output file
-	//ofstream data("data.csv", ofstream::out);
-	//// Print all prime numbers
-	//for (int p = 2; p <= n; p++)
-	//{
-	//	// If boolean is true then 
-	//	if (prime[p])
-	//	{
-	//		// Output the prime number to the file
-	//		data << p << endl;
-	//	}
-	//}
+	ofstream data("data.csv", ofstream::out);
+	// Print all prime numbers
+	for (int p = 2; p <= n; p++)
+	{
+		// If boolean is true then 
+		if (prime[p])
+		{
+			// Output the prime number to the file
+			data << p << endl;
+		}
+	}
 
 	// Delete the prime number bools
 	delete[] prime;
