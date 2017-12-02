@@ -17,66 +17,60 @@ using namespace std;
 using namespace std::chrono;
 
 // Code from taken http://www.sanfoundry.com/cpp-program-implement-wheel-sieve-generate-prime-numbers-between-given-range/
+// Theory taken from wiki and above web page
 
+// Wheel factorisation works by adding the first 2 prime numbers of 2 and 3
+// It then make n = p * c or n = 2* 3 which gives 6 values. From there factors of 2 are removed which have not already been marked as prime - 4 and 6.
+// The alogrithm will generate the next 6 numbers ipto 12 and then again up 18, 24.....
+// The algorithm will then go back through once again removing all the multiples of 2 and 3. This is then repeated over and over again leaving the prime numbers.
 void wheelFactorization(int n)
 {
 	// Create a billion ints
 	int* primes = new int[n];
 
-	for (int p = 2; p < n; p++) // for all elements in array
+	// For all elements in array
+	for (int p = 2; p < n; p++) 
 	{
-		if (primes[p] == 0) // it is not multiple of any other prime
-			primes[p] = 1; // mark it as prime
-
-						   // mark all multiples of prime selected above as non primes
+		// It is not multiple of any other prime
+		if (primes[p] == 0) 
+		{
+			// Mark it as prime
+			primes[p] = 1; 
+		}
+				
+		// Mark all multiples of prime selected above as non primes
+		// Set c to 2
 		int c = 2;
+		// Get multiples by multiplying p by c
 		int mul = p * c;
+		// while mul is less than n
 		for (; mul < n;)
 		{
+			// make primes mul equal minus one
 			primes[mul] = -1;
+			// Increment c
 			c++;
+			// Reset mul to p multiplied by c as c has now changed
 			mul = p * c;
 		}
 	}
 
 	// Create the output file for the prime numbers to be stored
 	ofstream data("data.csv", ofstream::out);
-	int c = 0;
+	// Loop through numbers one to a billion
+	// For i equal zero; while i is less than a billion; increment i
 	for (int i = 0; i < n; i++)
 	{
+		// If primes[number] equals one then increment c - output 
 		if (primes[i] == 1)
 		{
-			c++;
-
-			if (c < 4)
-			{
-				switch (c)
-				{
-				case 1:
-					data << i << endl;
-					break;
-				case 2:
-					data << i << endl;
-					break;
-				case 3:
-					data << i << endl;
-					break;
-
-				default:
-					break;
-				}
-			}
-
-			else
-				data << i << endl;
+			data << i << endl;
 		}
 	}
 
 	// Delete the prime number bools
 	delete[] primes;
 }
-
-
 
 // Code taken from http://www.geeksforgeeks.org/sieve-of-eratosthenes/
 // SieveOfEratosthenes prints all the prime numbers that are smaller or equal to n. n is the number, which in this case will be a billion, which is passed into the method.
@@ -316,7 +310,7 @@ int main()
 		// Start timing from this part of the algorithm. This is because some tests require more spheres than others.
 		auto start = system_clock::now();
 
-		gen_sieve_primes(1000000000);
+		wheelFactorization(1000000000);
 
 		// SieveOfAtkin 
 		// Normal algorithm

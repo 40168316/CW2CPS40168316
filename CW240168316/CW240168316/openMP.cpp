@@ -10,6 +10,56 @@ openMP::~openMP()
 {
 }
 
+void wheelFactorization(int n)
+{
+	// Create a billion ints
+	int* primes = new int[n];
+
+	// For all elements in array
+	for (int p = 2; p < n; p++)
+	{
+		// It is not multiple of any other prime
+		if (primes[p] == 0)
+		{
+			// Mark it as prime
+			primes[p] = 1;
+		}
+
+		// Mark all multiples of prime selected above as non primes
+		// Set c to 2
+		int c = 2;
+		// Get multiples by multiplying p by c
+		int mul = p * c;
+		// while mul is less than n
+#pragma omp parallel for num_threads(num_threads)
+		for (; mul < n;)
+		{
+			// make primes mul equal minus one
+			primes[mul] = -1;
+			// Increment c
+			c++;
+			// Reset mul to p multiplied by c as c has now changed
+			mul = p * c;
+		}
+	}
+
+	// Create the output file for the prime numbers to be stored
+	ofstream data("data.csv", ofstream::out);
+	// Loop through numbers one to a billion
+	// For i equal zero; while i is less than a billion; increment i
+	for (int i = 0; i < n; i++)
+	{
+		// If primes[number] equals one then increment c - output 
+		if (primes[i] == 1)
+		{
+			data << i << endl;
+		}
+	}
+
+	// Delete the prime number bools
+	delete[] primes;
+}
+
 void openMP::sundaramOpenMP(int inputNumber)
 {
 	// Set the initial variables
