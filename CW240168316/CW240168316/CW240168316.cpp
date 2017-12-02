@@ -16,6 +16,68 @@
 using namespace std;
 using namespace std::chrono;
 
+// Code from taken http://www.sanfoundry.com/cpp-program-implement-wheel-sieve-generate-prime-numbers-between-given-range/
+
+void wheelFactorization(int n)
+{
+	// Create a billion ints
+	int* primes = new int[n];
+
+	for (int p = 2; p < n; p++) // for all elements in array
+	{
+		if (primes[p] == 0) // it is not multiple of any other prime
+			primes[p] = 1; // mark it as prime
+
+						   // mark all multiples of prime selected above as non primes
+		int c = 2;
+		int mul = p * c;
+		for (; mul < n;)
+		{
+			primes[mul] = -1;
+			c++;
+			mul = p * c;
+		}
+	}
+
+	// Create the output file for the prime numbers to be stored
+	ofstream data("data.csv", ofstream::out);
+	int c = 0;
+	for (int i = 0; i < n; i++)
+	{
+		if (primes[i] == 1)
+		{
+			c++;
+
+			if (c < 4)
+			{
+				switch (c)
+				{
+				case 1:
+					data << i << endl;
+					break;
+				case 2:
+					data << i << endl;
+					break;
+				case 3:
+					data << i << endl;
+					break;
+
+				default:
+					break;
+				}
+			}
+
+			else
+				data << i << endl;
+		}
+	}
+
+	// Delete the prime number bools
+	delete[] primes;
+}
+
+
+
 // Code taken from http://www.geeksforgeeks.org/sieve-of-eratosthenes/
 // SieveOfEratosthenes prints all the prime numbers that are smaller or equal to n. n is the number, which in this case will be a billion, which is passed into the method.
 // SieveOfEratosthenes works by creating a list of consecutive integers from 2 to n - 1,000,000,000. It then lets p (which stand orime) equal to 2, the first prime number.
@@ -50,18 +112,17 @@ void SieveOfEratosthenes(int n)
 	}
 
 	// Create the output file
-	ofstream data("data.csv", ofstream::out);
-
-	 ////Print all prime numbers
-	for (int p = 2; p <= n; p++)
-	{
-		// If boolean is true then 
-		if (prime[p])
-		{
-			// Output the prime number to the file
-			data << p << endl;
-		}
-	}
+	//ofstream data("data.csv", ofstream::out);
+	// ////Print all prime numbers
+	//for (int p = 2; p <= n; p++)
+	//{
+	//	// If boolean is true then 
+	//	if (prime[p])
+	//	{
+	//		// Output the prime number to the file
+	//		data << p << endl;
+	//	}
+	//}
 
 	// Delete the prime number bools
 	delete[] prime;
@@ -150,14 +211,14 @@ void SieveOfAtkin(int n)
 	}
 
 	// Output the data if the values are prime numbers 
-	ofstream data("data.csv", ofstream::out);
-	for (int i = 2; i <= n; i++)
-	{
-		if (is_prime[i])
-		{
-			data << i << endl;
-		}
-	}
+	//ofstream data("data.csv", ofstream::out);
+	//for (int i = 2; i <= n; i++)
+	//{
+	//	if (is_prime[i])
+	//	{
+	//		data << i << endl;
+	//	}
+	//}
 }
 
 // Code taken from http://bcbutler.com/CPP_Tuts/c_plus_plus_sieve_of_sundaram.php 
@@ -247,13 +308,15 @@ int main()
 	ofstream times("times.csv", ofstream::out);
 
 	// For the 20 runs
-	for (int i = 0; i < 20; i++)
+	for (int i = 0; i < 1; i++)
 	{
 		// Call the method which finds prime numbers using the Sieve of Atkin Algorithm
 		int billion = 1000000000;
 
 		// Start timing from this part of the algorithm. This is because some tests require more spheres than others.
 		auto start = system_clock::now();
+
+		gen_sieve_primes(1000000000);
 
 		// SieveOfAtkin 
 		// Normal algorithm
@@ -269,7 +332,7 @@ int main()
 
 		// SieveOfSundaram
 		// Normal algorithm
-		SieveOfSundaram(billion);				// Correct file fize
+		//SieveOfSundaram(billion);				// Correct file fize
 		// OpenMP algorithm
 		//omp.sundaramOpenMP(billion);
 
