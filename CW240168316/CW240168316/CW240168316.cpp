@@ -310,7 +310,8 @@ int main()
 		// Start timing from this part of the algorithm. This is because some tests require more spheres than others.
 		auto start = system_clock::now();
 
-		wheelFactorization(1000000000);
+		wheelFactorization(billion);
+		omp.wheelFactorization(billion);
 
 		// SieveOfAtkin 
 		// Normal algorithm

@@ -21,6 +21,7 @@ public:
 	openMP();
 	~openMP();
 
+	void wheelFactorization(int n);
 	void sundaramOpenMP(int inputNumber);
 	void atkinOpenMp(int limit);
 	void eratosthenesOpenMP(int n);
