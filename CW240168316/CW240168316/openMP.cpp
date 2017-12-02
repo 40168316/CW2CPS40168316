@@ -10,7 +10,7 @@ openMP::~openMP()
 {
 }
 
-void wheelFactorization(int n)
+void openMP::wheelFactorization(int n)
 {
 	// Create a billion ints
 	int* primes = new int[n];
