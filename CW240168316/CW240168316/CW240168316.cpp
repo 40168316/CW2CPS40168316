@@ -23,7 +23,7 @@ using namespace std::chrono;
 // It then make n = p * c or n = 2* 3 which gives 6 values. From there factors of 2 are removed which have not already been marked as prime - 4 and 6.
 // The alogrithm will generate the next 6 numbers ipto 12 and then again up 18, 24.....
 // The algorithm will then go back through once again removing all the multiples of 2 and 3. This is then repeated over and over again leaving the prime numbers.
-void wheelFactorization(int n)
+void WheelFactorization(int n)
 {
 	// Create a billion ints
 	int* primes = new int[n];
@@ -56,17 +56,17 @@ void wheelFactorization(int n)
 	}
 
 	// Create the output file for the prime numbers to be stored
-	ofstream data("data.csv", ofstream::out);
-	// Loop through numbers one to a billion
-	// For i equal zero; while i is less than a billion; increment i
-	for (int i = 0; i < n; i++)
-	{
-		// If primes[number] equals one then increment c - output 
-		if (primes[i] == 1)
-		{
-			data << i << endl;
-		}
-	}
+	//ofstream data("data.csv", ofstream::out);
+	//// Loop through numbers one to a billion
+	//// For i equal zero; while i is less than a billion; increment i
+	//for (int i = 0; i < n; i++)
+	//{
+	//	// If primes[number] equals one then increment c - output 
+	//	if (primes[i] == 1)
+	//	{
+	//		data << i << endl;
+	//	}
+	//}
 
 	// Delete the prime number bools
 	delete[] primes;
@@ -301,35 +301,70 @@ int main()
 	// Create the output file
 	ofstream times("times.csv", ofstream::out);
 
-	// For the 20 runs
+	// Initialise the various input numbers 
+	int billion = 1000000000;
+	int halfBillion = 500000000;
+	int hunMillion = 100000000;
+
+	// For the 20 runs - used to get test data to find the average giving more accurate results to evaluate
 	for (int i = 0; i < 1; i++)
 	{
-		// Call the method which finds prime numbers using the Sieve of Atkin Algorithm
-		int billion = 1000000000;
-
 		// Start timing from this part of the algorithm. This is because some tests require more spheres than others.
 		auto start = system_clock::now();
 
-		//wheelFactorization(billion);
-		omp.wheelFactorization(billion);
+		// Create a billion ints
+		int* primes = new int[billion];
+
+		// For all elements in array
+		for (int p = 2; p < billion; p++)
+		{
+			// It is not multiple of any other prime
+			if (primes[p] == 0)
+			{
+				// Mark it as prime
+				primes[p] = 1;
+			}
+
+			// Mark all multiples of prime selected above as non primes
+			// Set c to 2
+			int c = 2;
+			// Get multiples by multiplying p by c
+			int mul = p * c;
+			// while mul is less than n
+			for (; mul < billion;)
+			{
+				// make primes mul equal minus one
+				primes[mul] = -1;
+				// Increment c
+				c++;
+				// Reset mul to p multiplied by c as c has now changed
+				mul = p * c;
+			}
+		}
+
+		// Wheel Factorisation
+		// Normal algorithm
+		//WheelFactorization(billion);
+		// OpenMP
+		//omp.wheelFactorization(hunMillion);
 
 		// SieveOfAtkin 
 		// Normal algorithm
-		//SieveOfAtkin(billion);					// Correct file fize
+		//SieveOfAtkin(halfBillion);					
 		// OpenMP
-		//omp.atkinOpenMp(billion);					// Correct file fize
+		//omp.atkinOpenMp(halfBillion);					
 
 		// SieveOfEratosthenes
 		// Normal algorithm
-		//SieveOfEratosthenes(billion);			// Correct file fize
+		//SieveOfEratosthenes(billion);			
 		// OpenMP algorithm
-		//omp.eratosthenesOpenMP(billion);		// Correct file fize
+		//omp.eratosthenesOpenMP(billion);		
 
 		// SieveOfSundaram
 		// Normal algorithm
-		//SieveOfSundaram(billion);				// Correct file fize
+		//SieveOfSundaram(billion);				
 		// OpenMP algorithm
-		//omp.sundaramOpenMP(billion);
+		//omp.sundaramOpenMP(hunMillion);
 
 		// End timing here as the algorithm has complete. 
 		auto end = system_clock::now();
@@ -339,7 +374,6 @@ int main()
 
 		// Output that time to a file
 		times << duration_cast<milliseconds>(total).count() << endl;
-		//cout << duration_cast<milliseconds>(total).count() << endl;
 	}
 
 	return 0;

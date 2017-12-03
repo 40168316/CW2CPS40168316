@@ -15,7 +15,10 @@ void openMP::wheelFactorization(int n)
 	// Create a billion ints
 	int* primes = new int[n];
 
+	// Get the number of threads the hardware can natively support
+	auto num_threads = thread::hardware_concurrency();
 	// For all elements in array
+#pragma omp parallel for num_threads(num_threads)
 	for (int p = 2; p < n; p++)
 	{
 		// It is not multiple of any other prime
@@ -31,7 +34,6 @@ void openMP::wheelFactorization(int n)
 		// Get multiples by multiplying p by c
 		int mul = p * c;
 		// while mul is less than n
-#pragma omp parallel for num_threads(num_threads)
 		for (; mul < n;)
 		{
 			// make primes mul equal minus one
@@ -44,17 +46,17 @@ void openMP::wheelFactorization(int n)
 	}
 
 	// Create the output file for the prime numbers to be stored
-	ofstream data("data.csv", ofstream::out);
-	// Loop through numbers one to a billion
-	// For i equal zero; while i is less than a billion; increment i
-	for (int i = 0; i < n; i++)
-	{
-		// If primes[number] equals one then increment c - output 
-		if (primes[i] == 1)
-		{
-			data << i << endl;
-		}
-	}
+	//ofstream data("data.csv", ofstream::out);
+	//// Loop through numbers one to a billion
+	//// For i equal zero; while i is less than a billion; increment i
+	//for (int i = 0; i < n; i++)
+	//{
+	//	// If primes[number] equals one then increment c - output 
+	//	if (primes[i] == 1)
+	//	{
+	//		data << i << endl;
+	//	}
+	//}
 
 	// Delete the prime number bools
 	delete[] primes;
@@ -81,7 +83,7 @@ void openMP::sundaramOpenMP(int inputNumber)
 		isPrime[i] = i + 1;
 	}
 
-#pragma omp parallel for schedule(static, 8) num_threads(num_threads)
+#pragma omp parallel for schedule(runtime) num_threads(num_threads)
 	// For i equals one; while i is less than n (calculated above); increment i
 	for (int i = 1; i < n; ++i)
 	{
