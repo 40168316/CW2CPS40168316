@@ -1,17 +1,18 @@
 #include "stdafx.h"
-#include "openMP.h"
+#include "OpenMPRuntime.h"
 
-openMP::openMP()
+
+OpenMPRuntime::OpenMPRuntime()
 {
 }
 
 
-openMP::~openMP()
+OpenMPRuntime::~OpenMPRuntime()
 {
 }
 
-// Wheel Factorisation OpenMp Parallel For Method
-void openMP::wheelFactorizationOpenMP(int n)
+// Wheel Factorisation OpenMp Parallel Runtime For Method
+void OpenMPRuntime::wheelFactorizationOpenMPRuntime(int n)
 {
 	// Create a billion ints
 	int* primes = new int[n];
@@ -20,7 +21,7 @@ void openMP::wheelFactorizationOpenMP(int n)
 	auto num_threads = thread::hardware_concurrency();
 	// For all elements in array
 	// OpenMP statement must be placed here - doesnt work at inner for loop where initial alaysis identied
-#pragma omp parallel for num_threads(num_threads)
+#pragma omp parallel for schedule(runtime) num_threads(num_threads)
 	for (int p = 2; p < n; p++)
 	{
 		// It is not multiple of any other prime
@@ -64,13 +65,13 @@ void openMP::wheelFactorizationOpenMP(int n)
 	delete[] primes;
 }
 
-// Sieve Sundaram OpenMp Parallel For Method
-void openMP::sundaramOpenMP(int inputNumber)
+// Sieve Sundaram OpenMp Parallel For Runtime Method
+void OpenMPRuntime::sundaramOpenMPRuntime(int inputNumber)
 {
 	// Set the initial variables
 	int TheseArePrime = 0; // variable used in the array that stores the prime numbers found
 	int totalPrimes = 0; // total number of prime numbers that are found
-	// Get n which is the inout number divided by 2
+						 // Get n which is the inout number divided by 2
 	int n = inputNumber / 2;
 
 	// Create a billion ints
@@ -87,7 +88,7 @@ void openMP::sundaramOpenMP(int inputNumber)
 	}
 
 	// OpenMP parallel For statement must go here has if placed on inner for loop, results are effected 
-#pragma omp parallel for num_threads(num_threads)
+#pragma omp parallel for schedule(runtime) num_threads(num_threads)
 	// For i equals one; while i is less than n (calculated above); increment i
 	for (int i = 1; i < n; ++i)
 	{
@@ -125,7 +126,7 @@ void openMP::sundaramOpenMP(int inputNumber)
 	// For the total number of primes
 	for (int x = 0; x < totalPrimes; x++)
 	{
-	// If the prime number does not equal zero then output - else then break
+		// If the prime number does not equal zero then output - else then break
 		if (isPrime[x] != 0)
 		{
 			data << isPrime[x] << endl;
@@ -140,8 +141,8 @@ void openMP::sundaramOpenMP(int inputNumber)
 	delete[] isPrime;
 }
 
-// Seive Atkin OpenMp Parallel For Method
-void openMP::atkinOpenMp(int n)
+// Seive Atkin OpenMp Parallel Runtime For Method
+void OpenMPRuntime::atkinOpenMpRuntime(int n)
 {
 	// Get the number of threads the hardware can natively support
 	auto num_threads = thread::hardware_concurrency();
@@ -162,7 +163,7 @@ void openMP::atkinOpenMp(int n)
 	int lim = ceil(sqrt(n));
 	// For x equals one; while x is less than or equal to the limit; increment x
 	// OpenMP parallel for placed here because it can effect output if placed in inner for loop
-#pragma omp parallel for num_threads(num_threads) 
+#pragma omp parallel for scheduleschedule(runtime) num_threads(num_threads) 
 	for (int x = 1; x <= lim; x++)
 	{
 		// For y equals one; while y is less than or equal to the limit; increment y
@@ -223,8 +224,8 @@ void openMP::atkinOpenMp(int n)
 	}
 }
 
-// Wheel Factorisation OpenMp Parallel For Method
-void openMP::eratosthenesOpenMP(int n)
+// Wheel Factorisation OpenMp Runtime Parallel For Method
+void OpenMPRuntime::eratosthenesOpenMPRuntime(int n)
 {
 	// Setup 1 billion and one booleans
 	bool* prime = new bool[n + 1];
@@ -240,7 +241,7 @@ void openMP::eratosthenesOpenMP(int n)
 		if (prime[p] == true)
 		{
 			// OpenMp Parallel For loop works fine here as identified in inital analysis
-#pragma omp parallel for num_threads(num_threads)
+#pragma omp parallel for schedule(runtime) num_threads(num_threads)
 			// Update all multiples of p
 			for (int i = p * 2; i <= n; i += p)
 			{

@@ -10,11 +10,16 @@
 #include <vector>
 #include <mutex>
 #include "openMP.h"
+#include "openMPStatic.h"
+#include "OpenMPRuntime.h"
 #include <omp.h>
 #include <math.h>
 
 using namespace std;
 using namespace std::chrono;
+
+// Calum Templeton - 40168316 - www.calumtempleton.com
+// NOTE - RUN IN RELEASE 64 bit
 
 // Code from taken http://www.sanfoundry.com/cpp-program-implement-wheel-sieve-generate-prime-numbers-between-given-range/
 // Theory taken from wiki and above web page
@@ -296,7 +301,9 @@ void SieveOfSundaram(int inputNumber)
 
 int main()
 {
-	openMP omp;
+	openMP ompParallelFor;
+	OpenMPStatic ompParallelForStatic;
+	OpenMPRuntime ompParallelForRuntime;
 
 	// Create the output file
 	ofstream times("times.csv", ofstream::out);
@@ -307,64 +314,50 @@ int main()
 	int hunMillion = 100000000;
 
 	// For the 20 runs - used to get test data to find the average giving more accurate results to evaluate
-	for (int i = 0; i < 1; i++)
+	for (int i = 0; i < 20; i++)
 	{
 		// Start timing from this part of the algorithm. This is because some tests require more spheres than others.
 		auto start = system_clock::now();
 
-		// Create a billion ints
-		int* primes = new int[billion];
-
-		// For all elements in array
-		for (int p = 2; p < billion; p++)
-		{
-			// It is not multiple of any other prime
-			if (primes[p] == 0)
-			{
-				// Mark it as prime
-				primes[p] = 1;
-			}
-
-			// Mark all multiples of prime selected above as non primes
-			// Set c to 2
-			int c = 2;
-			// Get multiples by multiplying p by c
-			int mul = p * c;
-			// while mul is less than n
-			for (; mul < billion;)
-			{
-				// make primes mul equal minus one
-				primes[mul] = -1;
-				// Increment c
-				c++;
-				// Reset mul to p multiplied by c as c has now changed
-				mul = p * c;
-			}
-		}
-
-		// Wheel Factorisation
+		//// Wheel Factorisation
 		// Normal algorithm
-		//WheelFactorization(billion);
-		// OpenMP
-		//omp.wheelFactorization(hunMillion);
+		WheelFactorization(billion);
+		// OpenMP Parallel For
+		ompParallelFor.wheelFactorizationOpenMP(billion);
+		// OpenMP Parallel For Static Schedule
+		ompParallelForStatic.wheelFactorizationOpenMPStatic(billion);
+		// OpenMP Parallel For Runtime Schedule
+		ompParallelForRuntime.wheelFactorizationOpenMPRuntime(billion);
 
 		// SieveOfAtkin 
 		// Normal algorithm
-		//SieveOfAtkin(halfBillion);					
-		// OpenMP
-		//omp.atkinOpenMp(halfBillion);					
+		SieveOfAtkin(halfBillion);					
+		// OpenMP Parallel For
+		ompParallelFor.atkinOpenMp(halfBillion);
+		// OpenMP Parallel For Static Schedule
+		ompParallelForStatic.atkinOpenMpStatic(billion);
+		// OpenMP Parallel For Runtime Schedule
+		ompParallelForRuntime.atkinOpenMpRuntime(billion);
 
 		// SieveOfEratosthenes
 		// Normal algorithm
-		//SieveOfEratosthenes(billion);			
-		// OpenMP algorithm
-		//omp.eratosthenesOpenMP(billion);		
+		SieveOfEratosthenes(billion);			
+		// OpenMP Parallel For
+		ompParallelFor.eratosthenesOpenMP(billion);
+		// OpenMP Parallel For Static Schedule
+		ompParallelForStatic.eratosthenesOpenMPStatic(billion);
+		// OpenMP Parallel For Runtime Schedule
+		ompParallelForRuntime.eratosthenesOpenMPRuntime(billion);
 
 		// SieveOfSundaram
 		// Normal algorithm
-		//SieveOfSundaram(billion);				
-		// OpenMP algorithm
-		//omp.sundaramOpenMP(hunMillion);
+		 SieveOfSundaram(billion);				
+		// OpenMP Parallel For
+		 ompParallelFor.sundaramOpenMP(billion);
+		 // OpenMP Parallel For Static Schedule
+		 ompParallelForStatic.sundaramOpenMPStatic(billion);
+		 // OpenMP Parallel For Runtime Schedule
+		 ompParallelForRuntime.sundaramOpenMPRuntime(billion);
 
 		// End timing here as the algorithm has complete. 
 		auto end = system_clock::now();

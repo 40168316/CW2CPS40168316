@@ -14,16 +14,16 @@
 using namespace std;
 using namespace std::chrono;
 
-class openMP
+class OpenMPRuntime
 {
 public:
-	openMP();
-	~openMP();
+	OpenMPRuntime();
+	~OpenMPRuntime();
 
 	// Methods which are called by from main and run the four algorithms using OpenMP Parallel For
-	void wheelFactorizationOpenMP(int n);
-	void sundaramOpenMP(int inputNumber);
-	void atkinOpenMp(int limit);
-	void eratosthenesOpenMP(int n);
+	void wheelFactorizationOpenMPRuntime(int n);
+	void sundaramOpenMPRuntime(int inputNumber);
+	void atkinOpenMpRuntime(int limit);
+	void eratosthenesOpenMPRuntime(int n);
 };
 
